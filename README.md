@@ -42,3 +42,10 @@ The trade-off: queries are a linear scan of at most `capacity` records. For a fe
 - `query_range(start, end)` is inclusive on both ends; `start > end` raises `ValueError` rather than returning an empty list, so a logic error in the caller is not silently swallowed.
 - Timestamps come from the `clock` callable passed to the constructor. The default clock returns `0.0` so behavior is deterministic unless you choose otherwise. To use real wall-clock time, pass `clock=time.time`.
 - `Record.__hash__` deliberately excludes `data` (a mutable dict); records that differ only in `data` will hash the same. Do not put records in a set expecting `data` to distinguish them.
+
+## Design notes
+
+The window stores values eagerly rather than keeping running aggregates. Running
+sums drift with floating point over long streams, and recomputing from a small
+buffer is cheap enough that the drift is not worth the speed.
+
